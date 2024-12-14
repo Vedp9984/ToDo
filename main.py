@@ -1,4 +1,4 @@
-from todo import *
+from todo import menu, take_input, execute, Colors
 def main():
     print(f"\n{Colors.HEADER}To-Do List Manager{Colors.ENDC}")
     menu()

@@ -1,3 +1,4 @@
+# gitignore for python projects by gitignore/Python.gitignore on github
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
