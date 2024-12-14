@@ -24,6 +24,7 @@ def save_todos(todos):
         json.dump(todos, file, indent=4)
 
 def validate_todos(todos):
+    task_names = set()
     for todo in todos:
         if "done" not in todo:
             todo["done"] = False
@@ -31,6 +32,9 @@ def validate_todos(todos):
             todo["priority"] = "low"
         if "task" not in todo:
             todo["task"] = "Unnamed task"
+        if "taskname" not in todo or not todo["taskname"] or " " in todo["taskname"] or todo["taskname"] in task_names:
+            todo["taskname"] = f"task_{len(task_names) + 1}"
+        task_names.add(todo["taskname"])
     return todos
 
 def display_todos(todos):
@@ -42,54 +46,66 @@ def display_todos(todos):
     print(f"{Colors.OKBLUE}{'-' * 35}{Colors.ENDC}")
     for idx, todo in enumerate(todos, 1):
         status = f"{Colors.FAIL}[ ]{Colors.ENDC}" if not todo["done"] else f"{Colors.OKGREEN}[x]{Colors.ENDC}"
-        print(f"{idx}. {status} ({todo['priority']}) {todo['task']}")
+        print(f"{idx}. {todo['taskname']}: {status} ({todo['priority']}) {todo['task']}")
     print(f"{Colors.OKBLUE}{'-' * 35}{Colors.ENDC}")
 
-def add_todo():
-    task = input("Enter a new to-do item: ")
+def add_todo(token: list[str]):
+    todos = load_todos()
+    taskname = input("Enter a task name: ") if len(token) == 1 else token[1]
+    task = input("Enter task description: ")
     priority = input("Enter the priority (high/medium/low): ")
     if not task:
         print(f"{Colors.FAIL}Task cannot be empty!{Colors.ENDC}")
+    elif " " in taskname or any(todo["taskname"] == taskname for todo in todos):
+        print(f"{Colors.FAIL}Task name must be unique and one word!{Colors.ENDC}")
     else:
-        todos = load_todos()
-        todos.append({"done": False, "priority": priority, "task": task})
+        new_todo = {
+            "task": task,
+            "priority": priority,
+            "done": False,
+            "taskname": taskname
+        }
+        todos.append(new_todo)
         save_todos(todos)
         print(f"{Colors.OKGREEN}Task added!{Colors.ENDC}")
 
-def mark_done(todos, done=True):
+def mark_done(tokens, todos, done=True):
     display_todos(todos)
-    task_num = input("Enter the task number to mark as done: ")
-    if not task_num.isdigit() or int(task_num) < 1 or int(task_num) > len(todos):
-        print(f"{Colors.FAIL}Invalid task number!{Colors.ENDC}")
+    task_name = input("Enter the task name to mark as done: ") if len(tokens) == 1 else tokens[1]
+    task_index = next((index for (index, d) in enumerate(todos) if d["taskname"] == task_name), None)
+    if task_index is None:
+        print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
     else:
-        todos[int(task_num) - 1]["done"] = done
+        todos[task_index]["done"] = done
         save_todos(todos)
         print(f"{Colors.OKGREEN}Task marked as {'done' if done else 'not done'}!{Colors.ENDC}")
 
-def edit_todo():
+def edit_todo(tokens: list[str]):
     todos = load_todos()
     display_todos(todos)
-    task_num = input("Enter the task number to edit: ")
-    if not task_num.isdigit() or int(task_num) < 1 or int(task_num) > len(todos):
-        print(f"{Colors.FAIL}Invalid task number!{Colors.ENDC}")
+    task_name = input("Enter the task name to edit: ") if len(tokens) == 1 else tokens[1]
+    task_index = next((index for (index, d) in enumerate(todos) if d["taskname"] == task_name), None)
+    if task_index is None:
+        print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
     else:
         new_task = input("Enter the new task text: ")
         new_priority = input("Enter the new priority (high/medium/low): ")
         if not new_task:
             print(f"{Colors.FAIL}Task cannot be empty!{Colors.ENDC}")
         else:
-            todos[int(task_num) - 1].update({"task": new_task, "priority": new_priority})
+            todos[task_index].update({"task": new_task, "priority": new_priority})
             save_todos(todos)
             print(f"{Colors.OKGREEN}Task edited!{Colors.ENDC}")
 
-def delete_todo():
+def delete_todo(tokens: list[str]):
     todos = load_todos()
     display_todos(todos)
-    task_num = input("Enter the task number to delete: ")
-    if not task_num.isdigit() or int(task_num) < 1 or int(task_num) > len(todos):
-        print(f"{Colors.FAIL}Invalid task number!{Colors.ENDC}")
+    task_name = input("Enter the task name to delete: ") if len(tokens) == 1 else tokens[1]
+    task_index = next((index for (index, d) in enumerate(todos) if d["taskname"] == task_name), None)
+    if task_index is None:
+        print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
     else:
-        todos.pop(int(task_num) - 1)
+        todos.pop(task_index)
         save_todos(todos)
         print(f"{Colors.OKGREEN}Task deleted!{Colors.ENDC}")
 
@@ -99,40 +115,49 @@ def sort_todos():
     save_todos(todos)
     print(f"{Colors.OKGREEN}Tasks sorted by priority!{Colors.ENDC}")
 
-def main():
-    while True:
-        print(f"\n{Colors.HEADER}To-Do List Manager{Colors.ENDC}")
-        print("1. Display To-Do List")
-        print("2. Add To-Do Item")
-        print("3. Mark Item as Done")
-        print("4. Mark Item as Not Done")
-        print("5. Edit To-Do Item")
-        print("6. Delete To-Do Item")
-        print("7. Sort Tasks by Priority")
-        print("8. Exit")
-        option = input("Choose an option: ")
+def menu():
+    print("1. show: Display To-Do List")
+    print("2. add [taskname]: Add To-Do Item")
+    print("3. done [taskname]: Mark Item as Done")
+    print("4. notdone [taskname]: Mark Item as Not Done")
+    print("5. edit [taskname]: Edit To-Do Item")
+    print("6. delete [taskname]: Delete To-Do Item")
+    print("7. sort: Sort Tasks by Priority")
+    print("8. exit: Exit")
 
-        todos = load_todos()
-        todos = validate_todos(todos)
+def take_input():
+    command = input("[ToDo]> ").lower()
+    tokens = command.split()
+    if not tokens:
+        print(f"{Colors.FAIL}No command entered!{Colors.ENDC}")
+        return []
 
-        if option == '1':
-            display_todos(todos)
-        elif option == '2':
-            add_todo()
-        elif option == '3':
-            mark_done(todos, done=True)
-        elif option == '4':
-            mark_done(todos, done=False)
-        elif option == '5':
-            edit_todo()
-        elif option == '6':
-            delete_todo()
-        elif option == '7':
-            sort_todos()
-        elif option == '8':
-            break
-        else:
-            print(f"{Colors.FAIL}Invalid option! Please choose again.{Colors.ENDC}")
+    return tokens
 
-if __name__ == "__main__":
-    main()
+def execute(tokens: list[str]):
+    todos = load_todos()
+    todos = validate_todos(todos)
+    action = tokens[0]
+    if action == 'show' or action == '1':
+        display_todos(todos)
+    elif action == 'add' or action == '2':
+        add_todo(tokens)
+    elif action == 'done' or action == '3':
+        mark_done(tokens, todos, done=True)
+    elif action == 'notdone' or action == '4':
+        mark_done(tokens, todos, done=False)
+    elif action == 'edit' or action == '5':
+        edit_todo(tokens)
+    elif action == 'delete' or action == '6':
+        delete_todo(tokens)
+    elif action == 'sort' or action == '7':
+        sort_todos()
+    elif action == 'exit' or action == '8':
+        exit()
+    elif action == 'help':
+        menu()
+    else:
+        print(f"{Colors.FAIL}Invalid command!{Colors.ENDC}\nUse \"help\" for a list of available commands")
+        return 1
+    return 0
+
