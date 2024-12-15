@@ -1,5 +1,6 @@
-from todo import menu, take_input, execute, Colors
+from todo import menu, take_input, execute, Colors, setup_readline
 def main():
+    setup_readline()
     print(f"\n{Colors.HEADER}To-Do List Manager{Colors.ENDC}")
     menu()
     while True:
