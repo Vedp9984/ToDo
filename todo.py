@@ -1,5 +1,6 @@
 import os
 import json
+import datetime
 
 TODO_FILE = os.path.expanduser("~/todo_list.json")
 
@@ -46,7 +47,7 @@ def display_todos(todos):
     print(f"{Colors.OKBLUE}{'-' * 35}{Colors.ENDC}")
     for idx, todo in enumerate(todos, 1):
         status = f"{Colors.FAIL}[ ]{Colors.ENDC}" if not todo["done"] else f"{Colors.OKGREEN}[x]{Colors.ENDC}"
-        print(f"{idx}. {todo['taskname']}: {status} ({todo['priority']}) {todo['task']}")
+        print(f"{idx}. {todo['taskname']}: {status} ({todo['priority']}) {todo['task']} [Deadline: {todo['deadline']}]")
     print(f"{Colors.OKBLUE}{'-' * 35}{Colors.ENDC}")
 
 def add_todo(token: list[str]):
@@ -54,6 +55,7 @@ def add_todo(token: list[str]):
     taskname = input("Enter a task name: ") if len(token) == 1 else token[1]
     task = input("Enter task description: ")
     priority = input("Enter the priority (high/medium/low): ")
+    deadline = input("Enter the deadline (YYYY-MM-DD): ")
     if not task:
         print(f"{Colors.FAIL}Task cannot be empty!{Colors.ENDC}")
     elif " " in taskname or any(todo["taskname"] == taskname for todo in todos):
@@ -63,7 +65,9 @@ def add_todo(token: list[str]):
             "task": task,
             "priority": priority,
             "done": False,
-            "taskname": taskname
+            "taskname": taskname,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "deadline": deadline
         }
         todos.append(new_todo)
         save_todos(todos)
@@ -80,6 +84,15 @@ def mark_done(tokens, todos, done=True):
         save_todos(todos)
         print(f"{Colors.OKGREEN}Task marked as {'done' if done else 'not done'}!{Colors.ENDC}")
 
+def gettimestamp(tokens: list[str]):
+    todos = load_todos()
+    task_name = input("Enter the task name to get timestamp: ") if len(tokens) == 1 else tokens[1]
+    task = next((todo for todo in todos if todo["taskname"] == task_name), None)
+    if task is None:
+        print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
+    else:
+        print(f"{Colors.OKBLUE}Timestamp for task '{task_name}': {task['timestamp']}{Colors.ENDC}")
+
 def edit_todo(tokens: list[str]):
     todos = load_todos()
     display_todos(todos)
@@ -88,14 +101,19 @@ def edit_todo(tokens: list[str]):
     if task_index is None:
         print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
     else:
-        new_task = input("Enter the new task text: ")
-        new_priority = input("Enter the new priority (high/medium/low): ")
-        if not new_task:
-            print(f"{Colors.FAIL}Task cannot be empty!{Colors.ENDC}")
-        else:
-            todos[task_index].update({"task": new_task, "priority": new_priority})
-            save_todos(todos)
-            print(f"{Colors.OKGREEN}Task edited!{Colors.ENDC}")
+        new_task = input("Enter the new task text (leave empty to keep current): ")
+        new_priority = input("Enter the new priority (high/medium/low, leave empty to keep current): ")
+        new_deadline = input("Enter the new deadline (YYYY-MM-DD, leave empty to keep current): ")
+        
+        if new_task:
+            todos[task_index]["task"] = new_task
+        if new_priority:
+            todos[task_index]["priority"] = new_priority
+        if new_deadline:
+            todos[task_index]["deadline"] = new_deadline
+        
+        save_todos(todos)
+        print(f"{Colors.OKGREEN}Task edited!{Colors.ENDC}")
 
 def delete_todo(tokens: list[str]):
     todos = load_todos()
@@ -146,6 +164,8 @@ def execute(tokens: list[str]):
         mark_done(tokens, todos, done=True)
     elif action == 'notdone' or action == '4':
         mark_done(tokens, todos, done=False)
+    elif action == 'timestamp':
+        gettimestamp(tokens)
     elif action == 'edit' or action == '5':
         edit_todo(tokens)
     elif action == 'delete' or action == '6':
