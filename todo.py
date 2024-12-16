@@ -22,10 +22,12 @@ def setup_readline():
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r") as file:
             for line in file:
+                #print(f"it is {line}")
                 command = line.split(" - ", 1)[1].strip()
-                readline.add_history(command)
+                #print(f"Adding to history: {command}")
+                readline.add_history(command.strip())
     readline.set_history_length(1000)
-    atexit.register(readline.write_history_file, HISTORY_FILE)
+    #atexit.register(readline.write_history_file, HISTORY_FILE)
 
 def load_todos():
     if os.path.exists(TODO_FILE):
@@ -165,14 +167,9 @@ def take_input():
 
     return tokens
 
-def log_history(command: str):
-    timestamp = datetime.datetime.now().isoformat()
-    with open(HISTORY_FILE, "a") as file:
-        file.write(f"{timestamp} - {command}\n")
-
 def execute(tokens: list[str]):
     command = " ".join(tokens)
-    log_history(command)
+    History.log_history(command)
     
     todos = load_todos()
     todos = validate_todos(todos)
@@ -200,7 +197,7 @@ def execute(tokens: list[str]):
     elif action == 'help':
         menu()
     else:
-        print(f"{Colors.FAIL}Invalid command!{Colors.ENDC}\nUse \"help\" for a list of available commands")
+        print(f"{Colors.FAIL}Invalid command!{Colors.ENDC}\n\nUse \"help\" for a list of available commands")
         return 1
     return 0
 
