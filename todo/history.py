@@ -1,7 +1,7 @@
 import os
 import datetime
 
-HISTORY_FILE = os.path.expanduser("~/todo_history.log")
+HISTORY_FILE = os.path.expanduser("~/.todo_history.log")
 def log_history(command: str):
     timestamp = datetime.datetime.now().isoformat()
     with open(HISTORY_FILE, "a") as file:

@@ -10,7 +10,6 @@ This is a simple command-line To-Do List Manager written in Python. It allows yo
 - Edit existing tasks.
 - Delete tasks.
 - Sort tasks by priority.
-- Get the timestamp of a task.
 
 ## Installation
 
@@ -22,12 +21,21 @@ This is a simple command-line To-Do List Manager written in Python. It allows yo
     ```sh
     cd ToDo
     ```
+3. Run the comman:
+    ```sh
+    pip install -e .
+    ```
+    or if you do not want to break system packages
+    ```sh
+    pipx install -e .
+    ```
+
 
 ## Usage
 
 Run the main script to start the To-Do List Manager:
 ```sh
-python main.py
+todo
 ```
 
 ### Commands
@@ -39,14 +47,20 @@ python main.py
 - `edit [taskname]`: Edit an existing task.
 - `delete [taskname]`: Delete a task.
 - `sort`: Sort tasks by priority.
+- `history`: Display history of last 100 typed commands
 - `exit`: Exit the application.
 - `help`: Display the list of available commands.
 
+### Further Information
+- history stored at ~/.todo_history.log
+- This project uses the `json` module for data storage.
+- data stored at ~/.todo_list.json
+
+## Credits
+- mayank3135432
+- Vedp9984
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request.
 
-## Acknowledgements
 
-- This project uses the `json` module for data storage.
-- Special thanks to all contributors and users.

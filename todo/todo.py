@@ -5,8 +5,7 @@ import readline
 import atexit
 from . import history as History
 
-TODO_FILE = os.path.expanduser("~/todo_list.json")
-HISTORY_FILE = os.path.expanduser("~/todo_history.log")
+TODO_FILE = os.path.expanduser("~/.todo_list.json")
 
 class Colors:
     HEADER = '\033[95m'
@@ -19,8 +18,8 @@ class Colors:
     UNDERLINE = '\033[4m'
 
 def setup_readline():
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "r") as file:
+    if os.path.exists(History.HISTORY_FILE):
+        with open(History.HISTORY_FILE, "r") as file:
             for line in file:
                 #print(f"it is {line}")
                 command = line.split(" - ", 1)[1].strip()
