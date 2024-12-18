@@ -3,7 +3,7 @@ import json
 import datetime
 import readline
 import atexit
-import history as History
+from . import history as History
 
 TODO_FILE = os.path.expanduser("~/todo_list.json")
 HISTORY_FILE = os.path.expanduser("~/todo_history.log")
