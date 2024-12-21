@@ -7,7 +7,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'todo=todo.main:main',  # Assuming you have a main function to run the app
+            'todo=todo.main:main',
         ],
     },
     description="A simple to-do list application",

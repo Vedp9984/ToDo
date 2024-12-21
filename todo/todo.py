@@ -4,6 +4,7 @@ import datetime
 import readline
 import atexit
 from . import history as History
+import fnmatch
 
 TODO_FILE = os.path.expanduser("~/.todo_list.json")
 
@@ -52,14 +53,23 @@ def validate_todos(todos):
         task_names.add(todo["taskname"])
     return todos
 
-def display_todos(todos):
+def display_todos(todos, pattern=None):
     if not todos:
         print(f"{Colors.WARNING}No to-do items found!{Colors.ENDC}")
         return
 
+    filtered_todos = todos
+    if pattern:
+        #print(f"Pattern is {pattern}")
+        filtered_todos = [todo for todo in todos if fnmatch.fnmatch(todo["taskname"], pattern)]
+
+    if not filtered_todos:
+        print(f"{Colors.WARNING}No to-do items matching the pattern '{pattern}' found!{Colors.ENDC}")
+        return
+
     print(f"\n{Colors.OKBLUE}To-Do List:{Colors.ENDC}")
     print(f"{Colors.OKBLUE}{'-' * 35}{Colors.ENDC}")
-    for idx, todo in enumerate(todos, 1):
+    for idx, todo in enumerate(filtered_todos, 1):
         status = f"{Colors.FAIL}[ ]{Colors.ENDC}" if not todo["done"] else f"{Colors.OKGREEN}[x]{Colors.ENDC}"
         print(f"{idx}. {todo['taskname']}: {status} ({todo['priority']}) {todo['task']} [Deadline: {todo['deadline']}]")
     print(f"{Colors.OKBLUE}{'-' * 35}{Colors.ENDC}")
@@ -88,15 +98,16 @@ def add_todo(token: list[str]):
         print(f"{Colors.OKGREEN}Task added!{Colors.ENDC}")
 
 def mark_done(tokens, todos, done=True):
-    display_todos(todos)
-    task_name = input("Enter the task name to mark as done: ") if len(tokens) == 1 else tokens[1]
-    task_index = next((index for (index, d) in enumerate(todos) if d["taskname"] == task_name), None)
-    if task_index is None:
-        print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
+    pattern = input("Enter the task name or pattern to mark as done: ") if len(tokens) == 1 else tokens[1]
+    matching_indices = [index for index, todo in enumerate(todos) if fnmatch.fnmatch(todo["taskname"], pattern)]
+    
+    if not matching_indices:
+        print(f"{Colors.FAIL}No tasks matching the pattern '{pattern}' found!{Colors.ENDC}")
     else:
-        todos[task_index]["done"] = done
+        for index in matching_indices:
+            todos[index]["done"] = done
         save_todos(todos)
-        print(f"{Colors.OKGREEN}Task marked as {'done' if done else 'not done'}!{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}Tasks matching the pattern '{pattern}' marked as {'done' if done else 'not done'}!{Colors.ENDC}")
 
 def gettimestamp(tokens: list[str]):
     todos = load_todos()
@@ -109,7 +120,7 @@ def gettimestamp(tokens: list[str]):
 
 def edit_todo(tokens: list[str]):
     todos = load_todos()
-    display_todos(todos)
+    display_todos(todos) if len(tokens) == 1 else None
     task_name = input("Enter the task name to edit: ") if len(tokens) == 1 else tokens[1]
     task_index = next((index for (index, d) in enumerate(todos) if d["taskname"] == task_name), None)
     if task_index is None:
@@ -131,15 +142,17 @@ def edit_todo(tokens: list[str]):
 
 def delete_todo(tokens: list[str]):
     todos = load_todos()
-    display_todos(todos)
-    task_name = input("Enter the task name to delete: ") if len(tokens) == 1 else tokens[1]
-    task_index = next((index for (index, d) in enumerate(todos) if d["taskname"] == task_name), None)
-    if task_index is None:
-        print(f"{Colors.FAIL}Invalid task name!{Colors.ENDC}")
+    #display_todos(todos)
+    pattern = input("Enter the task name or pattern to delete: ") if len(tokens) == 1 else tokens[1]
+    matching_indices = [index for index, todo in enumerate(todos) if fnmatch.fnmatch(todo["taskname"], pattern)]
+    
+    if not matching_indices:
+        print(f"{Colors.FAIL}No tasks matching the pattern '{pattern}' found!{Colors.ENDC}")
     else:
-        todos.pop(task_index)
+        for index in sorted(matching_indices, reverse=True):
+            todos.pop(index)
         save_todos(todos)
-        print(f"{Colors.OKGREEN}Task deleted!{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}Tasks matching the pattern '{pattern}' deleted!{Colors.ENDC}")
 
 def sort_todos():
     todos = load_todos()
@@ -173,8 +186,8 @@ def execute(tokens: list[str]):
     todos = load_todos()
     todos = validate_todos(todos)
     action = tokens[0]
-    if action == 'show' or action == '1':
-        display_todos(todos)
+    if action == 'show' or action == '1' or action == 'list' or action == 'ls':
+        display_todos(todos, pattern=tokens[1] if len(tokens) > 1 else None)
     elif action == 'add' or action == '2':
         add_todo(tokens)
     elif action == 'done' or action == '3':
