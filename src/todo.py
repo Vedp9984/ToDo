@@ -8,26 +8,7 @@ import fnmatch
 
 TODO_FILE = os.path.expanduser("~/.todo_list.json")
 
-class Colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-def setup_readline():
-    if os.path.exists(History.HISTORY_FILE):
-        with open(History.HISTORY_FILE, "r") as file:
-            for line in file:
-                #print(f"it is {line}")
-                command = line.split(" - ", 1)[1].strip()
-                #print(f"Adding to history: {command}")
-                readline.add_history(command.strip())
-    readline.set_history_length(1000)
-    #atexit.register(readline.write_history_file, HISTORY_FILE)
+from src.colours import Colors
 
 def load_todos():
     if os.path.exists(TODO_FILE):
@@ -174,7 +155,7 @@ def take_input():
     command = input("[ToDo]> ").lower()
     tokens = command.split()
     if not tokens:
-        print(f"{Colors.FAIL}No command entered!{Colors.ENDC}")
+        #print(f"{Colors.FAIL}No command entered!{Colors.ENDC}")
         return []
 
     return tokens

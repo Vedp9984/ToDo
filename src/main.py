@@ -1,7 +1,8 @@
 from . import todo as Todo
+from . import history as Readline
 
 def main():
-    Todo.setup_readline()
+    Readline.setup_readline()
     print(f"\n{Todo.Colors.HEADER}To-Do List Manager{Todo.Colors.ENDC}")
     Todo.menu()
     while True:

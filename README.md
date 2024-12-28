@@ -29,11 +29,30 @@ This is a simple command-line To-Do List Manager written in Python. It allows yo
     ```sh
     pipx install -e .
     ```
+## Updating
 
+To update the To-Do List Manager to the latest version, follow these steps:
+
+1. Navigate to the project directory:
+    ```sh
+    cd /path/to/your/ToDo
+    ```
+2. Pull the latest changes from the repository:
+    ```sh
+    git pull origin main
+    ```
+3. Reinstall the package:
+    ```sh
+    pip install -e .
+    ```
+    or if you do not want to break system packages
+    ```sh
+    pipx install -e .
+    ```
 
 ## Usage
 
-Run the main script to start the To-Do List Manager:
+Type todo in your terminal to start the To-Do List Manager:
 ```sh
 todo
 ```
@@ -48,6 +67,7 @@ todo
 - `delete [taskname]`: Delete a task.
 - `sort`: Sort tasks by priority.
 - `history`: Display history of last 100 typed commands
+- `timestamp [taskname]`: Add a timestamp to a task.
 - `exit`: Exit the application.
 - `help`: Display the list of available commands.
 
@@ -57,7 +77,7 @@ todo
 - data stored at ~/.todo_list.json
 
 ## Credits
-- mayank3135432
+- mayank3135432 a.k.a ateium munol
 - Vedp9984
 ## Contributing
 
