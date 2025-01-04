@@ -73,7 +73,7 @@ todo
 
 ### Further Information
 - history stored at ~/.todo_history.log
-- This project uses the `json` module for data storage.
+- This project uses a `json` file data storage.
 - data stored at ~/.todo_list.json
 
 ## Credits

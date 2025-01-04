@@ -1,0 +1,2 @@
+List on basis of deadline
+show 24 :: displays all tasks whose deadline is 24th of given month.
