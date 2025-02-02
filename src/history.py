@@ -11,12 +11,15 @@ def log_history(command: str):
         file.write(f"{timestamp} - {command}\n")
 
 def print_history():
+    i = 0
     if not os.path.exists(HISTORY_FILE):
         print("No history found!")
         return
     with open(HISTORY_FILE, "r") as file:
         for line in file:
-            print(line, end="")
+            i = i + 1
+            print(f"{i} {line}", end="")
+            #print(line, end="")
 
 def setup_readline():
     if os.path.exists(HISTORY_FILE):
